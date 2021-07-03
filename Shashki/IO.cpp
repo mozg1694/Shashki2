@@ -69,9 +69,21 @@ void IO::DrawBoard(const map& board)
 {
 	size_t boardSize = static_cast<size_t>(sqrt(board.size()));
 
+	std::cout << "  |";
+
+	for (size_t k = 0; k < boardSize; k++)
+	{
+		std::cout << k;
+		std::cout << "|";
+	}
+
+	std::cout << std::endl;
+
 	for (size_t i = 0; i < boardSize; i++)
 	{
-		std::cout << "|";
+		
+		std::cout << i;
+		std::cout << " |";
 
 		for (size_t j = 0; j < boardSize; j++)
 		{

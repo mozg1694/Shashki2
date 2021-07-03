@@ -1,4 +1,5 @@
 #include "Board.h"
+#include <iostream>
 
 
 Board::Board() : mBoardSize(10)
@@ -30,15 +31,16 @@ void Board::ResetMap()
 			else if (i == 2 && j % 2 != 0)
 			{
 				state = Cell::State::WHITE;
-			}else if (i == 5 && j % 2 == 0)
-			{
-				state = Cell::State::BLACK;
-			}
-			else if (i == 6 && j % 2 != 0)
-			{
-				state = Cell::State::BLACK;
 			}
 			else if (i == 7 && j % 2 == 0)
+			{
+				state = Cell::State::BLACK;
+			}
+			else if (i == 8 && j % 2 != 0)
+			{
+				state = Cell::State::BLACK;
+			}
+			else if (i == 9 && j % 2 == 0)
 			{
 				state = Cell::State::BLACK;
 			}
@@ -49,7 +51,6 @@ void Board::ResetMap()
 		}
 	}
 }
-
 
 Board::MoveResult Board::CheckMove(const pos &startPos, const pos &endPos, bool direction)
 {

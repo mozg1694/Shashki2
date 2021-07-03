@@ -1,7 +1,8 @@
 #include "Game.h"
 #include <iostream>
 #include <stdlib.h>
-
+#include <vector>
+#include <list>
 
 Game::Game() : mWhiteScore(0), mBlackScore(0), mLastPlayer(Player::NONE), bIsSurrender(false)
 {
@@ -42,9 +43,100 @@ Game::Player Game::GetWinner() const
 	return winner;
 }
 
+Move Game::FakeGame(size_t depth)
+{
+	std::cout << depth;
+	Move best_move;
+	Move cur_move;
+	Move cur_score;
+	best_move.wscore = mWhiteScore;
+	best_move.bscore = mBlackScore;
+
+	if (depth == 0) {
+		return best_move;
+	}
+
+	std::list<pos> variants;
+	if (GetCurrentPlayer() == "Black") {
+		for (auto const& x : mboard.GetMap()) {
+			if (x.second.GetState() == Cell::State::BLACK) {
+				variants.push_back(x.first);
+			}
+		}
+	}
+	else {
+		for (auto const& x : mboard.GetMap()) {
+			if (x.second.GetState() == Cell::State::WHITE) {
+				variants.push_back(x.first);
+			}
+		}
+	}
+	for (auto const& x : variants) {
+		cur_move.start_pos = x;
+		
+		Board::MoveResult moveResult(Board::MoveResult::PROHIBITED);
+		std::list<pos> moves;
+
+		if (GetCurrentPlayer() == "Black") {
+			moves.push_back(pos(x.first - 1, x.second - 1));
+			moves.push_back(pos(x.first - 1, x.second + 1));
+			moves.push_back(pos(x.first - 2, x.second - 2));
+			moves.push_back(pos(x.first - 2, x.second + 2));
+		}
+		else {
+			moves.push_back(pos(x.first + 1, x.second - 1));
+			moves.push_back(pos(x.first + 1, x.second + 1));
+			moves.push_back(pos(x.first + 2, x.second - 2));
+			moves.push_back(pos(x.first + 2, x.second + 2));
+		}
+
+		for (const auto& move : moves)
+		{
+			bool direction = GetDirection();
+			cur_move.end_pos = move;
+			moveResult = mboard.MakeMove(x, move, direction);
+			if (moveResult == Board::MoveResult::PROHIBITED) {
+				continue;
+			}
+
+			// Parse Move Result
+			if (moveResult == Board::MoveResult::SUCCESSFUL_COMBAT)
+			{
+				// update score
+				UpdateScore();
+			}
+
+			// update last player
+			SwitchPlayer();
+			cur_score = FakeGame(depth - 1);
+			if (GetCurrentPlayer() == "White") {
+				if (cur_score.bscore > best_move.bscore) {
+					best_move.bscore = cur_score.bscore;
+					best_move.wscore = cur_score.wscore;
+					best_move.start_pos = cur_move.start_pos;
+					best_move.end_pos = cur_move.end_pos;
+				}
+			}
+			else {
+				if (cur_score.wscore < best_move.wscore) {
+					best_move.bscore = cur_score.bscore;
+					best_move.wscore = cur_score.wscore;
+					best_move.start_pos = cur_move.start_pos;
+					best_move.end_pos = cur_move.end_pos;
+				}
+			}
+		}
+	}
+	std::cout << best_move.bscore;
+	std::cout << std::endl;
+	std::cout << best_move.wscore;
+	std::cout << std::endl;
+	return best_move;
+}
 
 void Game::Start()
 {
+	Move test;
 	mboard.ResetMap();
 	// Check is game over
 	while (GetWinner() == Player::NONE)
